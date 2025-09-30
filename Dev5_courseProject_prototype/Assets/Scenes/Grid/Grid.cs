@@ -1,14 +1,16 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using UnityEngine;
 
 public class GridSystem : MonoBehaviour
 {
-    public GameObject objectToPlace;
-    public float gridSize = 1f;
-    private GameObject ghostObject;
-    private HashSet<Vector3> occupiedPositions = new HashSet<Vector3>();
+    public GameObject objectToPlace;   
+    public float gridSize = 1f;        
+    private GameObject ghostObject;    
+
+    private Dictionary<Vector3, GameObject> placedObjects = new Dictionary<Vector3, GameObject>();
+
+    private enum GhostMode { Place, Remove }
+    private GhostMode currentMode = GhostMode.Place;
 
     private void Start()
     {
@@ -19,8 +21,19 @@ public class GridSystem : MonoBehaviour
     {
         UpdateGhostPosition();
 
+        
+        if (Input.GetKey(KeyCode.LeftShift))
+            currentMode = GhostMode.Remove;
+        else
+            currentMode = GhostMode.Place;
+
         if (Input.GetMouseButtonDown(0))
-            PlaceObject();
+        {
+            if (currentMode == GhostMode.Place)
+                PlaceObject();
+            else if (currentMode == GhostMode.Remove)
+                RemoveObject();
+        }
     }
 
     void CreateGhostObject()
@@ -29,23 +42,12 @@ public class GridSystem : MonoBehaviour
         ghostObject.GetComponent<Collider>().enabled = false;
 
         Renderer[] renderers = ghostObject.GetComponentsInChildren<Renderer>();
-
         foreach (Renderer renderer in renderers)
         {
             Material mat = renderer.material;
             Color color = mat.color;
             color.a = 0.5f;
             mat.color = color;
-
-            mat.SetFloat("_Mode", 2);
-            mat.SetInt("_ScrBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            mat.SetInt("ZWrite", 0);
-            mat.DisableKeyword("ALPHATEST_ON");
-            mat.EnableKeyword("_ALPHABLEND_ON");
-            mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            mat.renderQueue = 3000;
-
         }
     }
 
@@ -65,17 +67,26 @@ public class GridSystem : MonoBehaviour
 
             ghostObject.transform.position = snappedPosition;
 
-            if (occupiedPositions.Contains(snappedPosition))
-                SetGhostColor(Color.red);
-            else
-                SetGhostColor(new Color(1f, 1f, 1f, 0.5f));
+            if (currentMode == GhostMode.Place)
+            {
+                if (placedObjects.ContainsKey(snappedPosition))
+                    SetGhostColor(new Color(1f, 0f, 0f, 0.5f)); 
+                else
+                    SetGhostColor(new Color(1f, 1f, 1f, 0.5f)); 
+            }
+            else if (currentMode == GhostMode.Remove)
+            {
+                if (placedObjects.ContainsKey(snappedPosition))
+                    SetGhostColor(new Color(1f, 0f, 0f, 0.5f)); 
+                else
+                    SetGhostColor(new Color(0.5f, 0.5f, 0.5f, 0.3f)); 
+            }
         }
     }
 
     void SetGhostColor(Color color)
     {
         Renderer[] renderers = ghostObject.GetComponentsInChildren<Renderer>();
-
         foreach (Renderer renderer in renderers)
         {
             Material mat = renderer.material;
@@ -87,10 +98,22 @@ public class GridSystem : MonoBehaviour
     {
         Vector3 placementPosition = ghostObject.transform.position;
 
-        if (!occupiedPositions.Contains(placementPosition))
+        if (!placedObjects.ContainsKey(placementPosition))
         {
-            Instantiate(objectToPlace, placementPosition, Quaternion.identity);
-            occupiedPositions.Add(placementPosition);
+            GameObject placed = Instantiate(objectToPlace, placementPosition, Quaternion.identity);
+            placedObjects.Add(placementPosition, placed);
+        }
+    }
+
+    void RemoveObject()
+    {
+        Vector3 targetPosition = ghostObject.transform.position;
+
+        if (placedObjects.ContainsKey(targetPosition))
+        {
+            GameObject toRemove = placedObjects[targetPosition];
+            Destroy(toRemove);
+            placedObjects.Remove(targetPosition);
         }
     }
 }
