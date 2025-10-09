@@ -1,0 +1,35 @@
+using UnityEditor.Experimental.GraphView;
+using UnityEngine;
+
+public class HexGrid : MonoBehaviour
+{
+    [field: SerializeField] public int Width { get; private set; }
+    [field: SerializeField] public int Height { get; private set; }
+    [field: SerializeField] public float Hexsize { get; private set; }
+    [field: SerializeField] public GameObject HexPrefab { get; private set; }
+    [field: SerializeField] public HexOrientation Orientation { get; private set; } = HexOrientation.FlatTop;
+
+    private void OnDrawGizmos()
+    {
+        for (int z = 0; z < Height; z++)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                Vector3 centerPosition = HexMetrics.Center(Hexsize, x, z, Orientation) + transform.position;
+                for (int s = 0; s<HexMetrics.Corners(Hexsize, Orientation).Length; s++)
+                {
+                    Gizmos.DrawLine(
+                    centerPosition + HexMetrics.Corners(Hexsize, Orientation)[s % 6],
+                    centerPosition + HexMetrics.Corners(Hexsize, Orientation)[(s + 1) % 6]
+                    );
+                }
+            }
+        }
+    }
+}
+
+public enum HexOrientation
+{
+    FlatTop,
+PointyTop
+}
