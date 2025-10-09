@@ -95,15 +95,24 @@ public class GridSystem : MonoBehaviour
     }
 
     void PlaceObject()
-    {
-        Vector3 placementPosition = ghostObject.transform.position;
+{
+    Vector3 placementPosition = ghostObject.transform.position;
 
-        if (!placedObjects.ContainsKey(placementPosition))
+    if (!placedObjects.ContainsKey(placementPosition))
+    {
+        GameObject placed = Instantiate(objectToPlace, placementPosition, Quaternion.identity);
+        placedObjects.Add(placementPosition, placed);
+
+        MeleeUnit unit = placed.GetComponent<MeleeUnit>();
+        if (unit != null)
         {
-            GameObject placed = Instantiate(objectToPlace, placementPosition, Quaternion.identity);
-            placedObjects.Add(placementPosition, placed);
+                Debug.Log("failed to find cube");
+            unit.gridPosition = Vector3Int.RoundToInt(placementPosition);
         }
     }
+}
+
+
 
     void RemoveObject()
     {
