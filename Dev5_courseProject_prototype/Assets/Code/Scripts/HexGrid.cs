@@ -5,7 +5,7 @@ public class HexGrid : MonoBehaviour
 {
     [field: SerializeField] public int Width { get; private set; }
     [field: SerializeField] public int Height { get; private set; }
-    [field: SerializeField] public float Hexsize { get; private set; }
+    [field: SerializeField] public float HexSize { get; private set; }
     [field: SerializeField] public GameObject HexPrefab { get; private set; }
     [field: SerializeField] public HexOrientation Orientation { get; private set; } = HexOrientation.FlatTop;
 
@@ -15,12 +15,12 @@ public class HexGrid : MonoBehaviour
         {
             for (int x = 0; x < Width; x++)
             {
-                Vector3 centerPosition = HexMetrics.Center(Hexsize, x, z, Orientation) + transform.position;
-                for (int s = 0; s<HexMetrics.Corners(Hexsize, Orientation).Length; s++)
+                Vector3 centerPosition = HexMetrics.Center(HexSize, x, z, Orientation) + transform.position;
+                for (int s = 0; s<HexMetrics.Corners(HexSize, Orientation).Length; s++)
                 {
                     Gizmos.DrawLine(
-                    centerPosition + HexMetrics.Corners(Hexsize, Orientation)[s % 6],
-                    centerPosition + HexMetrics.Corners(Hexsize, Orientation)[(s + 1) % 6]
+                    centerPosition + HexMetrics.Corners(HexSize, Orientation)[s % 6],
+                    centerPosition + HexMetrics.Corners(HexSize, Orientation)[(s + 1) % 6]
                     );
                 }
             }
