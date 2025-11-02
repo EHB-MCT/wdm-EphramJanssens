@@ -1,6 +1,7 @@
 using Unity.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 public class HexGridMeshGenerator : MonoBehaviour
@@ -8,6 +9,7 @@ public class HexGridMeshGenerator : MonoBehaviour
     [field: SerializeField] public LayerMask gridLayer { get; private set; }
     [field: SerializeField] public HexGrid hexGrid { get; private set; }
     [SerializeField] private Material defaultMaterial;
+    [SerializeField] private GameObject explosionTest;
 
 
     private void Awake()
@@ -16,7 +18,19 @@ public class HexGridMeshGenerator : MonoBehaviour
             hexGrid = GetComponentInParent<HexGrid>();
         if (hexGrid == null)
             Debug.LogError("HexGridMeshGenerator could not find a HexGrid component in its parent or itself.");
-        }
+    }
+
+    private void OnEnable()
+    {
+        MouseController.instance.OnLeftMouseClick += OnLeftMouseClick;
+        MouseController.instance.OnRightMouseClick += OnRightMouseClick;
+    }
+
+    private void OnDisable()
+    {
+        MouseController.instance.OnLeftMouseClick -= OnLeftMouseClick;
+        MouseController.instance.OnRightMouseClick -= OnRightMouseClick;
+    }
 
     public void CreateHexMesh()
     {
@@ -110,5 +124,25 @@ public class HexGridMeshGenerator : MonoBehaviour
             }
         }
         return 0;
+    }
+
+    private void OnLeftMouseClick(RaycastHit hit)
+    {
+        Debug.Log("Hit object:" + hit.transform.name + "at position" + hit.point);
+        float localX = hit.point.x - hit.transform.position.x;
+        float localZ = hit.point.z - hit.transform.position.z;
+        //Debug.Log("Hex position:" + HexMetrics.CoordinateToAxial(localX, localZ, Grid.Hexsize, Grid.Orientation));
+        Debug.Log("Offset Position:" + HexMetrics.CoordinateToOffset(localX, localZ, hexGrid.HexSize, hexGrid.Orientation));
+    }
+
+    private void OnRightMouseClick(RaycastHit hit)
+    {
+        float localX = hit.point.x - hit.transform.position.x;
+        float localZ = hit.point.z - hit.transform.position.z;
+
+        Vector2 location = HexMetrics.CoordinateToOffset(localX, localZ, hexGrid.HexSize, hexGrid.Orientation);
+        Vector3 center = HexMetrics.Center(hexGrid.HexSize, (int)location.x, (int)location.y, hexGrid.Orientation);
+        Debug.Log("Right Clicked on Hex:" + location);
+        Instantiate(explosionTest, center, Quaternion.identity);
     }
 }
