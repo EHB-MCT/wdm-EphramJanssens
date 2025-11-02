@@ -16,9 +16,9 @@ public class HexGridEditor : Editor
                 int centerX = x;
                 int centerZ = z;
 
-                Vector3 cubeCoord = HexMetrics.OffsetToCube(centerX, centerZ, hexGrid.Orientation);
+                Vector3 cubeCoords = HexMetrics.AxialToCube(HexMetrics.OffsetToAxial(x, z, hexGrid.Orientation));
                 Handles.Label(centerPosition + Vector3.forward * 0.5f, $"[{centerX}, {centerZ}]");
-                Handles.Label(centerPosition, $"[{cubeCoord.x}, {cubeCoord.y}, {cubeCoord.z}]");
+                Handles.Label(centerPosition, $"[{cubeCoords.x}, {cubeCoords.y}, {cubeCoords.z}]");
             }
         }
     }
