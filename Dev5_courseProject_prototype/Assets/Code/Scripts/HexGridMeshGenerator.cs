@@ -136,13 +136,21 @@ public class HexGridMeshGenerator : MonoBehaviour
     }
 
     private void OnRightMouseClick(RaycastHit hit)
-    {
-        float localX = hit.point.x - hit.transform.position.x;
-        float localZ = hit.point.z - hit.transform.position.z;
+{
+    float localX = hit.point.x - hexGrid.transform.position.x;
+    float localZ = hit.point.z - hexGrid.transform.position.z;
+    Vector2 axial = HexMetrics.CoordinateToAxial(localX, localZ, hexGrid.HexSize, hexGrid.Orientation);
+    Vector2Int clickPos = new Vector2Int(Mathf.RoundToInt(axial.x), Mathf.RoundToInt(axial.y));
 
-        Vector2 location = HexMetrics.CoordinateToOffset(localX, localZ, hexGrid.HexSize, hexGrid.Orientation);
-        Vector3 center = HexMetrics.Center(hexGrid.HexSize, (int)location.x, (int)location.y, hexGrid.Orientation);
-        Debug.Log("Right Clicked on Hex:" + location);
-        Instantiate(explosionTest, center, Quaternion.identity);
+    HexTile clickedTile = hexGrid.GetTileAt(clickPos);
+
+    if (clickedTile != null)
+    {
+        Debug.Log($"RAAK! Je klikte op tegel: {clickedTile.TileName} op wereldpositie {clickedTile.WorldPosition}");
     }
+    else
+    {
+        Debug.Log("MIS! Klikte buiten de geregistreerde grid data.");
+    }
+}
 }
