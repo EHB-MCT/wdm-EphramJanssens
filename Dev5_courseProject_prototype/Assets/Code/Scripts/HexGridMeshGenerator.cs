@@ -20,18 +20,6 @@ public class HexGridMeshGenerator : MonoBehaviour
             Debug.LogError("HexGridMeshGenerator could not find a HexGrid component in its parent or itself.");
     }
 
-    private void OnEnable()
-    {
-        MouseController.instance.OnLeftMouseClick += OnLeftMouseClick;
-        MouseController.instance.OnRightMouseClick += OnRightMouseClick;
-    }
-
-    private void OnDisable()
-    {
-        MouseController.instance.OnLeftMouseClick -= OnLeftMouseClick;
-        MouseController.instance.OnRightMouseClick -= OnRightMouseClick;
-    }
-
     public void CreateHexMesh()
     {
         CreateHexMesh(hexGrid.Width, hexGrid.Height, hexGrid.HexSize, hexGrid.Orientation, gridLayer);
@@ -146,11 +134,11 @@ public class HexGridMeshGenerator : MonoBehaviour
 
     if (clickedTile != null)
     {
-        Debug.Log($"RAAK! Je klikte op tegel: {clickedTile.TileName} op wereldpositie {clickedTile.WorldPosition}");
+        Debug.Log($"Hit. Clicked on tile: {clickedTile.TileName} on worldposition {clickedTile.WorldPosition}");
     }
     else
     {
-        Debug.Log("MIS! Klikte buiten de geregistreerde grid data.");
+        Debug.Log("Missed. Clicked outside of grid data.");
     }
 }
 }
