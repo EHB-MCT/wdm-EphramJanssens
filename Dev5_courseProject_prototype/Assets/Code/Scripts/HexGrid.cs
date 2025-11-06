@@ -27,8 +27,9 @@ public class HexGrid : MonoBehaviour
         int startCol = 2;
         int startRow = 2;
 
-        Vector2 axialFloat = HexMetrics.OffsetToAxial(startCol, startRow, Orientation);
-        Vector2Int startAxialPos = new Vector2Int(Mathf.RoundToInt(axialFloat.x), Mathf.RoundToInt(axialFloat.y));
+        Vector3 startLocal = HexMetrics.Center(HexSize, startCol, startRow, Orientation);
+        Vector2 axialExact = HexMetrics.CoordinateToAxial(startLocal.x, startLocal.z, HexSize, Orientation);
+        Vector2Int startAxialPos = new Vector2Int(Mathf.RoundToInt(axialExact.x), Mathf.RoundToInt(axialExact.y));
 
         Unit spawnedUnit = Instantiate(testUnitPrefab);
         spawnedUnit.name = $"Unit {startAxialPos}";
@@ -39,12 +40,8 @@ public class HexGrid : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"Kan unit niet spawnen: Tegel [Offset {startCol},{startRow} / Axial {startAxialPos}] bestaat niet!");
+            Debug.LogError($"Cannot spawn Unit: tile [Offset {startCol},{startRow} / Axial {startAxialPos}] doesn't exist.");
         }
-    }
-    else
-    {
-        Debug.LogWarning("Vergeet niet je Test Unit Prefab toe te wijzen in de Inspector van HexGrid!");
     }
 }
 
@@ -53,23 +50,28 @@ public class HexGrid : MonoBehaviour
         tiles.Clear();
 
         for (int z = 0; z < Height; z++)
+    {
+        for (int x = 0; x < Width; x++)
         {
-            for (int x = 0; x < Width; x++)
+            Vector3 centerLocal = HexMetrics.Center(HexSize, x, z, Orientation);
+            Vector3 worldPos = centerLocal + transform.position;
+
+            Vector2 axialExact = HexMetrics.CoordinateToAxial(centerLocal.x, centerLocal.z, HexSize, Orientation);
+            Vector2Int gridPos = new Vector2Int(Mathf.RoundToInt(axialExact.x), Mathf.RoundToInt(axialExact.y));
+
+            HexTile newTile = new HexTile(gridPos, worldPos);
+
+            if (!tiles.ContainsKey(gridPos))
             {
-                Vector2 axialFloat = HexMetrics.OffsetToAxial(x, z, Orientation);
-                Vector2Int gridPos = new Vector2Int(Mathf.RoundToInt(axialFloat.x), Mathf.RoundToInt(axialFloat.y));
-
-                Vector3 worldPos = HexMetrics.Center(HexSize, x, z, Orientation) + transform.position;
-
-                HexTile newTile = new HexTile(gridPos, worldPos);
-
-                if (!tiles.ContainsKey(gridPos))
-                {
-                    tiles.Add(gridPos, newTile);
-                }
+                tiles.Add(gridPos, newTile);
+            }
+            else
+            {
+                 Debug.LogWarning($"Dubble tiles detected on {gridPos}! Check HexSize/Orientation.");
             }
         }
-        Debug.Log($"HexGrid Data gegenereerd. {tiles.Count} tegels in geheugen.");
+    }
+    Debug.Log($"HexGrid Data generated. {tiles.Count} tiles in memory.");
     }
 
     public HexTile GetTileAt(Vector2Int axialPos)
