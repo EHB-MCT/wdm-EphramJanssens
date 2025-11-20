@@ -8,6 +8,7 @@ public class Unit : MonoBehaviour
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private int currentHealth;
     [SerializeField] private int movementRange = 3;
+    public int MovementRange => movementRange;
     [SerializeField] private int attackDamage = 25;
 
     public Vector2Int GridPosition { get; private set; }

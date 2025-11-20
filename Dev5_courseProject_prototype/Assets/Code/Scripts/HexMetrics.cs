@@ -194,4 +194,19 @@ public static class HexMetrics
     {
         return AxialToCube(axialCoord.x, axialCoord.y);
     }
+
+    public static Vector3Int AxialToCubeInt(Vector2Int axial)
+    {
+        int q = axial.x;
+        int r = axial.y;
+        int s = -q - r;
+        return new Vector3Int(q,r,s);
+    }
+
+    public static int GetDistance(Vector2Int a, Vector2Int b)
+    {
+        Vector3Int ac = AxialToCubeInt(a);
+        Vector3Int bc = AxialToCubeInt(b);
+        return (Mathf.Abs(ac.x = bc.x) + Mathf.Abs(ac.y-bc.y) + Mathf.Abs(ac.z - bc.z)) / 2;
+    }
 }

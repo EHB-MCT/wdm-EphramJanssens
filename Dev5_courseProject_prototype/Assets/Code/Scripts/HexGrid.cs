@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.CodeDom.Compiler;
 using System;
+using NUnit.Framework.Interfaces;
 
 public class HexGrid : MonoBehaviour
 {
@@ -99,6 +100,29 @@ public class HexGrid : MonoBehaviour
                 }
             }
         }
+    }
+
+    public List<Vector2Int> GetTilesInRadius(Vector2Int center, int range)
+    {
+        List<Vector2Int> results = new List<Vector2Int>();
+
+        for (int q = -range; q <= range; q++)
+        {
+            int r1 = Mathf.Max(-range, -q - range);
+            int r2 = Mathf.Min(range, -q + range);
+
+            for (int r = r1; r <= r2; r++)
+            {
+                Vector2Int offset = new Vector2Int(q, r);
+                Vector2Int neighbourPos = center + offset;
+
+                if (tiles.ContainsKey(neighbourPos))
+                {
+                    results.Add(neighbourPos);
+                }
+            }
+        }
+        return results;
     }
 }
 
