@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Dev5_courseProject_prototype.sln"
+    "dotnet.defaultSolution": "Dev5_courseProject_prototype.slnx"
 }

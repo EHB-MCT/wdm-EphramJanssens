@@ -1,5 +1,6 @@
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Unit : MonoBehaviour
 {
@@ -23,13 +24,15 @@ public class Unit : MonoBehaviour
         MoveToTile(startPos, grid, true);
     }
 
-    public void MoveToTile(Vector2Int newPos, HexGrid grid, bool instant = false)
+    public void MoveToTile(Vector2Int newPos, HexGrid grid, bool instant = false, bool logToBackend = true)
     {
         HexTile oldTile = grid.GetTileAt(GridPosition);
         if (oldTile != null && oldTile.OccupyingUnit == this)
         {
             oldTile.OccupyingUnit = null;
         }
+
+        Vector2Int previousPos = GridPosition;
 
         GridPosition = newPos;
         HexTile newTile = grid.GetTileAt(newPos);
@@ -47,13 +50,54 @@ public class Unit : MonoBehaviour
                 transform.position = newTile.WorldPosition;
             }
             Debug.Log($"{unitName} moved to {GridPosition}");
+
+            if (logToBackend && GameLogger.Instance != null)
+            {
+                var movePayload = new
+                {
+                    unit = unitName,
+                    from = new { z = previousPos.x, y = previousPos.y},
+                    to = new { x = GridPosition.x, y = GridPosition.y }
+                };
+                GameLogger.Instance.LogAction("Move", movePayload);
+            }
+        }
+    }
+
+    public void Attack(Unit target)
+    {
+        if (target == null) return;
+        Debug.Log($"{unitName} attacks {target.name}.");
+
+        target.TakeDamage(attackDamage);
+
+        if (GameLogger.Instance != null)
+        {
+            var attackPayload = new
+            {
+                attacker = unitName,
+                target = target.name,
+                damageDealt = attackDamage,
+                weapon = "sword"
+            };
         }
     }
 
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
-        Debug.Log($"{unitName} took {damage} damage! HP: {currentHealth}/{maxHealth}");
+        Debug.Log($"{unitName} took {damage} damage. HP: {currentHealth}/{maxHealth}");
+
+        if (GameLogger.Instance != null)
+        {
+            var damagePayload = new
+            {
+                victim = unitName,
+                damageReceived = damage,
+                remainingHp = currentHealth
+            };
+            GameLogger.Instance.LogAction("TakeDamage", damagePayload);
+        }
 
         if (currentHealth <= 0)
         {
@@ -64,6 +108,12 @@ public class Unit : MonoBehaviour
     private void Die()
     {
         Debug.Log($"{unitName} has died!");
+        
+        if (GameLogger.Instance != null)
+        {
+            GameLogger.Instance.LogAction("UnitDeath", new {unit = unitName, position = GridPosition});
+        }
+
         Destroy(gameObject);
     }
 }

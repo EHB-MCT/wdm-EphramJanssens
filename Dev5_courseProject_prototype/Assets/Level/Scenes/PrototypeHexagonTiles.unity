@@ -534,6 +534,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1266183103}
   - component: {fileID: 1266183104}
+  - component: {fileID: 1266183105}
   - component: {fileID: 1266183102}
   m_Layer: 0
   m_Name: GameManager
@@ -581,8 +582,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5954ab78e1650bb48abf4b593ff35f47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  highlightPrefab: {fileID: 7009650636369556557, guid: 0938ba06e03ec624b9cb0fd095d9aad3, type: 3}
   debugMarkerPrefab: {fileID: 7663288470284135687, guid: f31be9cf673d5f34f8161616cf0afa94, type: 3}
   hexGrid: {fileID: 244629580}
+--- !u!114 &1266183105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1266183101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91be16dae6e293545810c94334d008c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serverUrl: http://localhost:3000/api/log
+  currentUserId: Player_1
 --- !u!43 &1903824698
 Mesh:
   m_ObjectHideFlags: 0
