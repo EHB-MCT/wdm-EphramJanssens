@@ -4,6 +4,7 @@ using UnityEngine;
 using System.CodeDom.Compiler;
 using System;
 using NUnit.Framework.Interfaces;
+using UnityEngine.Tilemaps;
 
 public class HexGrid : MonoBehaviour
 {
@@ -22,29 +23,34 @@ public class HexGrid : MonoBehaviour
     }
 
     private void Start()
-{
-    if (testUnitPrefab != null)
     {
-        int startCol = 2;
-        int startRow = 2;
-
-        Vector3 startLocal = HexMetrics.Center(HexSize, startCol, startRow, Orientation);
-        Vector2 axialExact = HexMetrics.CoordinateToAxial(startLocal.x, startLocal.z, HexSize, Orientation);
-        Vector2Int startAxialPos = new Vector2Int(Mathf.RoundToInt(axialExact.x), Mathf.RoundToInt(axialExact.y));
-
-        Unit spawnedUnit = Instantiate(testUnitPrefab);
-        spawnedUnit.name = $"Unit {startAxialPos}";
-
-        if (GetTileAt(startAxialPos) != null)
+      if (testUnitPrefab != null)
         {
-             spawnedUnit.SetStartupPosition(startAxialPos, this);
+            SpawnUnit(2.2, UnitTeam.Player, "Player");
+            SpawnUnit(2.4, UnitTeam.Enemy, "Enemy");
+        }
+    }
+
+    private void SpawnUnit(int col, int row, UnitTeam team, string name)
+    {
+        Vector3 startLocal = HexMetrics.Center(HexSize, col, row, Orientation);
+        Vector2 axialExact = HexMetrics.CoordinateToAxial(startLocal.x, startLocal.z, HexSize, Orientation);
+        Vector2Int gridPos = new Vector2Int(Mathf.RoundToInt(axialExact.x), Mathf.RoundToInt(axialExact.y));
+
+        HexTile tile = GetTileAt(gridPos);
+
+        if (tile != null)
+        {
+            Unit spawnedUnit = Instantiate(testUnitPrefab);
+            spawnedUnit.name = name;
+            spawnedUnit.Initialize(team, name);
+            spawnedUnit.SetStartupPosition(gridPos, this);
         }
         else
         {
-            Debug.LogError($"Cannot spawn Unit: tile [Offset {startCol},{startRow} / Axial {startAxialPos}] doesn't exist.");
+            Debug.LogError($"Could not spawn {name} at {gridPos}");
         }
     }
-}
 
     public void GenerateGridData()
     {

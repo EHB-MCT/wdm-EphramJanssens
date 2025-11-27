@@ -38,44 +38,31 @@ public class GameInteraction : MonoBehaviour
     private void HandleLeftClick(RaycastHit hit)
     {
         Unit hitUnit = hit.collider.GetComponent<Unit>();
+
         if (hitUnit != null)
         {
-            if (selectedUnit != hitUnit)
+            if (selectedUnit == null || hitUnit.Team == UnitTeam.Player)
             {
-                ClearHighlights();
-                selectedUnit = hitUnit;
-                Debug.Log($"Unit Selected: {selectedUnit.name} on {selectedUnit.GridPosition}");
-                ShowRange(selectedUnit);
-            }
-            else
-            {
-                selectedUnit = null;
-                Debug.Log("Unit Deselected.");
-                ClearHighlights();
-            }
-            return;
-        }
-
-        if (selectedUnit != null)
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Vector2Int gridPos = GetGridPosFromRay(ray);
-            HexTile clickedTile = hexGrid.GetTileAt(gridPos);
-
-            if (clickedTile != null && clickedTile.OccupyingUnit == null)
-            {
-                int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, gridPos);
-                
-                if (distance <= selectedUnit.MovementRange) 
+                if (hitUnit.Team == UnitTeam.Player)
                 {
-                    selectedUnit.MoveToTile(gridPos, hexGrid);
-                    selectedUnit = null;
-                    ClearHighlights();
+                    HandleSelection(hitUnit);
+                }
+                return;
+            }
+            
+            if (selectedUnit != null && hitUnit.Team == UnitTeam.Enemy)
+            {
+                int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, hitUnit.GridPosition);
+
+                if (distance <= selectedUnit.AttackRange)
+                {
+                    selectedUnit.Attack(hitUnit);
                 }
                 else
                 {
-                    Debug.Log("Te ver weg!");
+                    Debug.Log("Enemy too far away.");
                 }
+                return;
             }
         }
     }
