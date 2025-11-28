@@ -65,6 +65,45 @@ public class GameInteraction : MonoBehaviour
                 return;
             }
         }
+
+        if (selectedUnit != null)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Vector2Int gridPos = GetGridPosFromRay(ray);
+            HexTile clickedTile = hexGrid.GetTileAt(gridPos);
+
+            if (clickedTile != null && clickedTile.OccupyingUnit == null)
+            {
+                int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, gridPos);
+
+                if (distance <= selectedUnit.MovementRange)
+                {
+                    selectedUnit.MoveToTile(gridPos, hexGrid);
+                    selectedUnit = null;
+                    ClearHighlights();
+                }
+                else
+                {
+                    Debug.Log("Destination is too far.");
+                }
+            }
+        }
+    }
+
+    private void HandleSelection (Unit unit)
+    {
+        if (selectedUnit != unit)
+        {
+            ClearHighlights();
+            selectedUnit = unit;
+            Debug.Log($"Unit selected: {selectedUnit.name}");
+            ShowRange(selectedUnit);
+        }
+        else
+        {
+            selectedUnit = null;
+            ClearHighlights();
+        }
     }
 
     private void HandleRightClick(RaycastHit hit)

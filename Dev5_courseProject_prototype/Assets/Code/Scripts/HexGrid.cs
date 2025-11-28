@@ -1,10 +1,6 @@
-using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
 using UnityEngine;
-using System.CodeDom.Compiler;
 using System;
-using NUnit.Framework.Interfaces;
-using UnityEngine.Tilemaps;
 
 public class HexGrid : MonoBehaviour
 {
@@ -26,8 +22,8 @@ public class HexGrid : MonoBehaviour
     {
       if (testUnitPrefab != null)
         {
-            SpawnUnit(2.2, UnitTeam.Player, "Player");
-            SpawnUnit(2.4, UnitTeam.Enemy, "Enemy");
+            SpawnUnit(2, 2, UnitTeam.Player, "Player");
+            SpawnUnit(2, 4, UnitTeam.Enemy, "Enemy");
         }
     }
 

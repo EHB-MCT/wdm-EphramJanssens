@@ -8,6 +8,7 @@ public class GameLogger : MonoBehaviour
 {
     public static GameLogger Instance {get; private set;}
     [Header("Backend Settings")]
+    [SerializeField] private bool enableLogging = false;
     [SerializeField] private string serverUrl = "http://localhost:3000/api/log";
     [SerializeField] private string currentUserId = "Player_1";
 
@@ -26,6 +27,7 @@ public class GameLogger : MonoBehaviour
 
     public void LogAction (string actionType, object payload)
     {
+        if (!enableLogging) return;
         StartCoroutine(PostLogRoutine(actionType, payload));
     }
 
