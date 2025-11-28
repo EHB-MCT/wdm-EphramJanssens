@@ -38,22 +38,32 @@ public class GameInteraction : MonoBehaviour
     private void HandleLeftClick(RaycastHit hit)
     {
         Unit hitUnit = hit.collider.GetComponent<Unit>();
+
         if (hitUnit != null)
         {
-            if (selectedUnit != hitUnit)
+            if (selectedUnit == null || hitUnit.Team == UnitTeam.Player)
             {
-                ClearHighlights();
-                selectedUnit = hitUnit;
-                Debug.Log($"Unit Selected: {selectedUnit.name} on {selectedUnit.GridPosition}");
-                ShowRange(selectedUnit);
+                if (hitUnit.Team == UnitTeam.Player)
+                {
+                    HandleSelection(hitUnit);
+                }
+                return;
             }
-            else
+            
+            if (selectedUnit != null && hitUnit.Team == UnitTeam.Enemy)
             {
-                selectedUnit = null;
-                Debug.Log("Unit Deselected.");
-                ClearHighlights();
+                int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, hitUnit.GridPosition);
+
+                if (distance <= selectedUnit.AttackRange)
+                {
+                    selectedUnit.Attack(hitUnit);
+                }
+                else
+                {
+                    Debug.Log("Enemy too far away.");
+                }
+                return;
             }
-            return;
         }
 
         if (selectedUnit != null)
@@ -65,8 +75,8 @@ public class GameInteraction : MonoBehaviour
             if (clickedTile != null && clickedTile.OccupyingUnit == null)
             {
                 int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, gridPos);
-                
-                if (distance <= selectedUnit.MovementRange) 
+
+                if (distance <= selectedUnit.MovementRange)
                 {
                     selectedUnit.MoveToTile(gridPos, hexGrid);
                     selectedUnit = null;
@@ -74,9 +84,25 @@ public class GameInteraction : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Te ver weg!");
+                    Debug.Log("Destination is too far.");
                 }
             }
+        }
+    }
+
+    private void HandleSelection (Unit unit)
+    {
+        if (selectedUnit != unit)
+        {
+            ClearHighlights();
+            selectedUnit = unit;
+            Debug.Log($"Unit selected: {selectedUnit.name}");
+            ShowRange(selectedUnit);
+        }
+        else
+        {
+            selectedUnit = null;
+            ClearHighlights();
         }
     }
 

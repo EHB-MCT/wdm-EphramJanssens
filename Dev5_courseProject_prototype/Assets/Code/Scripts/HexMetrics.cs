@@ -1,6 +1,3 @@
-using Unity.Collections;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public static class HexMetrics
@@ -207,6 +204,6 @@ public static class HexMetrics
     {
         Vector3Int ac = AxialToCubeInt(a);
         Vector3Int bc = AxialToCubeInt(b);
-        return (Mathf.Abs(ac.x = bc.x) + Mathf.Abs(ac.y-bc.y) + Mathf.Abs(ac.z - bc.z)) / 2;
+        return (Mathf.Abs(ac.x - bc.x) + Mathf.Abs(ac.y-bc.y) + Mathf.Abs(ac.z - bc.z)) / 2;
     }
 }
