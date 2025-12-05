@@ -20,11 +20,16 @@ public class Unit : MonoBehaviour
     [field: SerializeField] public int AttackRange {get; private set;} = 1;
     [SerializeField] private int baseDamage = 25;
 
+    [Header("Turn management")]
+    [field: SerializeField] public int MaxActionPoints {get; private set;} = 2;
+    public int CurrentActionPoints {get; private set;}
+
     public Vector2Int GridPosition { get; private set; }
 
     private void Start()
     {
         currentHealth = maxHealth;
+        CurrentActionPoints = MaxActionPoints;
     }
 
     public void Initialize(UnitTeam team, string name)
@@ -43,6 +48,29 @@ public class Unit : MonoBehaviour
 
     }
 
+     public void ResetTurn()
+    {
+        CurrentActionPoints = MaxActionPoints;
+        if (Team == UnitTeam.Enemy) GetComponent<Renderer>().material.color = Color.red;
+        else GetComponent<Renderer>().material.color = Color.blue;
+    }
+
+    public bool CanTakeAction(int cost = 1)
+    {
+        return CurrentActionPoints >= cost;
+    }
+
+    public void SpendActionPoints(int cost)
+    {
+        CurrentActionPoints -= cost;
+        Debug.Log($"{unitName} spent {cost} AP. Remaining: {CurrentActionPoints}");
+
+        if (CurrentActionPoints <= 0)
+        {
+            GetComponent<Renderer>().material.color = Color.gray;
+        }
+    }
+
     public void SetStartupPosition(Vector2Int startPos, HexGrid grid)
     {
         GridPosition = startPos;
@@ -57,6 +85,12 @@ public class Unit : MonoBehaviour
 
     public void MoveToTile(Vector2Int newPos, HexGrid grid, bool instant = false, bool logToBackend = true)
     {
+        if (!CanTakeAction(1) && !instant)
+        {
+            Debug.Log("Geen actiepunten meer voor bewegen.");
+            return;
+        }
+
         HexTile oldTile = grid.GetTileAt(GridPosition);
         if (oldTile != null && oldTile.OccupyingUnit == this)
         {
@@ -77,26 +111,32 @@ public class Unit : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(lookDirection);
             }
 
-            if (instant) transform.position = newTile.WorldPosition;
-            else transform.position = newTile.WorldPosition;
-        }
+            transform.position = newTile.WorldPosition;
+
+            if (!instant)
+            {
+                SpendActionPoints(1);
+            }
 
             Debug.Log($"{unitName} moved to {GridPosition}");
 
             if (logToBackend && GameLogger.Instance != null)
             {
-                var movePayload = new
-                {
-                    unit = unitName,
-                    from = new { x = previousPos.x, y = previousPos.y }, 
-                    to = new { x = GridPosition.x, y = GridPosition.y }
-                };
+                var movePayload = new { unit = unitName, from = new { x = previousPos.x, y = previousPos.y }, to = new { x = GridPosition.x, y = GridPosition.y } };
                 GameLogger.Instance.LogAction("Move", movePayload);
             }
         }
+    }
 
     public void Attack(Unit target)
     {
+        if (!CanTakeAction(1))
+        {
+            Debug.Log("No actionpoints left to attack with.");
+            return;
+        }
+
+
         if (target == null) return;
 
         transform.LookAt(target.transform);
@@ -123,8 +163,9 @@ public class Unit : MonoBehaviour
 
         int finalDamage = Mathf.RoundToInt(baseDamage * damageMultiplier);
 
-        Debug.Log($"⚔️ {unitName} attacks {target.unitName} ({attackType}) for {finalDamage} damage!");
+        Debug.Log($"{unitName} attacks {target.unitName} ({attackType}) for {finalDamage} damage!");
 
+        SpendActionPoints(1);
         target.TakeDamage(finalDamage);
 
         if (GameLogger.Instance != null)

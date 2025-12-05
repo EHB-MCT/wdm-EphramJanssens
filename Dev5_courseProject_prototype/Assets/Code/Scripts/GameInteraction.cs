@@ -37,6 +37,12 @@ public class GameInteraction : MonoBehaviour
 
     private void HandleLeftClick(RaycastHit hit)
     {
+        if (!TurnManager.Instance.IsMyTurn(UnitTeam.Player))
+        {
+            Debug.Log("Wait. It is the enemy turn.");
+            return;
+        }
+
         Unit hitUnit = hit.collider.GetComponent<Unit>();
 
         if (hitUnit != null)
@@ -52,15 +58,23 @@ public class GameInteraction : MonoBehaviour
             
             if (selectedUnit != null && hitUnit.Team == UnitTeam.Enemy)
             {
+                if (!selectedUnit.CanTakeAction(1))
+                {
+                    Debug.Log("This unit has no AP to attack.");
+                    return;
+                }
+
                 int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, hitUnit.GridPosition);
 
                 if (distance <= selectedUnit.AttackRange)
                 {
                     selectedUnit.Attack(hitUnit);
+                    selectedUnit = null;
+                    ClearHighlights();
                 }
                 else
                 {
-                    Debug.Log("Enemy too far away.");
+                    Debug.Log("Enemy is too far away");
                 }
                 return;
             }
@@ -74,6 +88,12 @@ public class GameInteraction : MonoBehaviour
 
             if (clickedTile != null && clickedTile.OccupyingUnit == null)
             {
+                if (!selectedUnit.CanTakeAction(1))
+                {
+                    Debug.Log("This unit has no AP to move.");
+                    return;
+                }
+
                 int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, gridPos);
 
                 if (distance <= selectedUnit.MovementRange)
@@ -84,7 +104,7 @@ public class GameInteraction : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Destination is too far.");
+                    Debug.Log("Destination is too far away.");
                 }
             }
         }
