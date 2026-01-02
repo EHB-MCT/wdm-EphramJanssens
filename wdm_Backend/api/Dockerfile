@@ -5,7 +5,6 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Kopieer package.json en package-lock.json EERST
-# Dit maakt gebruik van Docker's layer caching, wat builds versnelt
 COPY package*.json ./
 
 # Installeer de dependencies
