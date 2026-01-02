@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 });
 
 
-app.post('/api/log', async (req, res) => {
+app.post('/api/logs', async (req, res) => {
     const { userId, actionType, payload } = req.body;
 
 

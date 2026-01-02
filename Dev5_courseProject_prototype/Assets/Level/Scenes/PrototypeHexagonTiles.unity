@@ -915,9 +915,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91be16dae6e293545810c94334d008c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enableLogging: 0
-  serverUrl: http://localhost:3000/api/log
-  currentUserId: Player_1
+  enableLogging: 1
+  serverUrl: http://localhost:3000/api/logs
 --- !u!114 &1266183106
 MonoBehaviour:
   m_ObjectHideFlags: 0
