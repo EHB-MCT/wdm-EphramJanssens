@@ -1,12 +1,7 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GameInteraction : MonoBehaviour
 {
-    [Header("visuals")]
-    public GameObject highlightPrefab;
-    private List<GameObject> currentHighlights = new List<GameObject>();
-
     [Header("Debug")]
     public GameObject debugMarkerPrefab;
     [Header("References")]
@@ -37,92 +32,50 @@ public class GameInteraction : MonoBehaviour
 
     private void HandleLeftClick(RaycastHit hit)
     {
-        if (!TurnManager.Instance.IsMyTurn(UnitTeam.Player))
+        Unit hitUnit = hit.collider.GetComponent<Unit>();
+        if (hitUnit != null)
         {
-            Debug.Log("Wait. It is the enemy turn.");
+            if (selectedUnit != hitUnit)
+            {
+                selectedUnit = hitUnit;
+                Debug.Log($"Unit Selected: {selectedUnit.name} on {selectedUnit.GridPosition}");
+            }
+            else
+            {
+                selectedUnit = null;
+                Debug.Log("Unit Deselected.");
+            }
             return;
         }
 
-        Unit hitUnit = hit.collider.GetComponent<Unit>();
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Vector2Int gridPos = GetGridPosFromRay(ray);
 
-        if (hitUnit != null)
-        {
-            if (selectedUnit == null || hitUnit.Team == UnitTeam.Player)
-            {
-                if (hitUnit.Team == UnitTeam.Player)
-                {
-                    HandleSelection(hitUnit);
-                }
-                return;
-            }
-            
-            if (selectedUnit != null && hitUnit.Team == UnitTeam.Enemy)
-            {
-                if (!selectedUnit.CanTakeAction(1))
-                {
-                    Debug.Log("This unit has no AP to attack.");
-                    return;
-                }
+        HexTile clickedTile = hexGrid.GetTileAt(gridPos);
 
-                int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, hitUnit.GridPosition);
-
-                if (distance <= selectedUnit.AttackRange)
-                {
-                    selectedUnit.Attack(hitUnit);
-                    selectedUnit = null;
-                    ClearHighlights();
-                }
-                else
-                {
-                    Debug.Log("Enemy is too far away");
-                }
-                return;
-            }
-        }
+        if (clickedTile == null) return;
 
         if (selectedUnit != null)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Vector2Int gridPos = GetGridPosFromRay(ray);
-            HexTile clickedTile = hexGrid.GetTileAt(gridPos);
-
-            if (clickedTile != null && clickedTile.OccupyingUnit == null)
+            if (clickedTile.OccupyingUnit == null)
             {
-                if (!selectedUnit.CanTakeAction(1))
-                {
-                    Debug.Log("This unit has no AP to move.");
-                    return;
-                }
-
-                int distance = HexMetrics.GetDistance(selectedUnit.GridPosition, gridPos);
-
-                if (distance <= selectedUnit.MovementRange)
-                {
-                    selectedUnit.MoveToTile(gridPos, hexGrid);
-                    selectedUnit = null;
-                    ClearHighlights();
-                }
-                else
-                {
-                    Debug.Log("Destination is too far away.");
-                }
+                Debug.Log($"Moving to: {gridPos}");
+                selectedUnit.MoveToTile(gridPos, hexGrid);
+                selectedUnit = null;
             }
-        }
-    }
-
-    private void HandleSelection (Unit unit)
-    {
-        if (selectedUnit != unit)
-        {
-            ClearHighlights();
-            selectedUnit = unit;
-            Debug.Log($"Unit selected: {selectedUnit.name}");
-            ShowRange(selectedUnit);
+            else if (clickedTile.OccupyingUnit != selectedUnit)
+            {
+                selectedUnit = clickedTile.OccupyingUnit;
+                Debug.Log($"New unit selected: {selectedUnit.name}");
+            }
         }
         else
         {
-            selectedUnit = null;
-            ClearHighlights();
+            if (clickedTile.OccupyingUnit != null)
+            {
+                selectedUnit = clickedTile.OccupyingUnit;
+                Debug.Log($"Unit selected on tile: {selectedUnit.name}");
+            }
         }
     }
 
@@ -132,35 +85,7 @@ public class GameInteraction : MonoBehaviour
         {
             selectedUnit = null;
             Debug.Log("Selection cancelled.");
-            ClearHighlights();
         }
-    }
-
-    private void ShowRange(Unit unit)
-    {
-        List<Vector2Int> rangeTiles = hexGrid.GetTilesInRadius(unit.GridPosition, unit.MovementRange);
-
-        foreach (Vector2Int pos in rangeTiles)
-        {
-            if (pos == unit.GridPosition) continue;
-
-            HexTile tile = hexGrid.GetTileAt(pos);
-            if (tile != null)
-            {
-                Vector3 highlightPos = tile.WorldPosition + Vector3.up * 0.1f;
-                GameObject highlight = Instantiate(highlightPrefab, highlightPos, highlightPrefab.transform.rotation);
-                currentHighlights.Add(highlight);
-            }
-        }
-    }
-
-    private void ClearHighlights()
-    {
-        foreach (GameObject highlight in currentHighlights)
-        {
-            Destroy(highlight);
-        }
-        currentHighlights.Clear();
     }
 
     private Vector2Int GetGridPosFromRay(Ray ray)
@@ -174,6 +99,7 @@ public class GameInteraction : MonoBehaviour
 
             if (debugMarkerPrefab != null)
             {
+                 // Als we nog geen instantie hebben, maak er een. Anders, verplaats hem.
                  if (GameObject.Find("DEBUG_MARKER") == null)
                  {
                      GameObject marker = Instantiate(debugMarkerPrefab, hitPoint, Quaternion.identity);

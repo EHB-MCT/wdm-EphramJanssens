@@ -97,14 +97,3 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
-
-# --- Docker & Database ---
-postgres_data/            
-.env                       
-
-# --- Backend ---
-wdm_Backend/api/node_modules/
-
-# --- Admin Dashboard ---
-wdm_Admin/node_modules/
-wdm_Admin/dist/

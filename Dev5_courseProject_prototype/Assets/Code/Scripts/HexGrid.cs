@@ -1,5 +1,7 @@
+using UnityEditor.Experimental.GraphView;
 using System.Collections.Generic;
 using UnityEngine;
+using System.CodeDom.Compiler;
 using System;
 
 public class HexGrid : MonoBehaviour
@@ -19,34 +21,29 @@ public class HexGrid : MonoBehaviour
     }
 
     private void Start()
+{
+    if (testUnitPrefab != null)
     {
-      if (testUnitPrefab != null)
-        {
-            SpawnUnit(2, 2, UnitTeam.Player, "Player");
-            SpawnUnit(2, 4, UnitTeam.Enemy, "Enemy");
-        }
-    }
+        int startCol = 2;
+        int startRow = 2;
 
-    private void SpawnUnit(int col, int row, UnitTeam team, string name)
-    {
-        Vector3 startLocal = HexMetrics.Center(HexSize, col, row, Orientation);
+        Vector3 startLocal = HexMetrics.Center(HexSize, startCol, startRow, Orientation);
         Vector2 axialExact = HexMetrics.CoordinateToAxial(startLocal.x, startLocal.z, HexSize, Orientation);
-        Vector2Int gridPos = new Vector2Int(Mathf.RoundToInt(axialExact.x), Mathf.RoundToInt(axialExact.y));
+        Vector2Int startAxialPos = new Vector2Int(Mathf.RoundToInt(axialExact.x), Mathf.RoundToInt(axialExact.y));
 
-        HexTile tile = GetTileAt(gridPos);
+        Unit spawnedUnit = Instantiate(testUnitPrefab);
+        spawnedUnit.name = $"Unit {startAxialPos}";
 
-        if (tile != null)
+        if (GetTileAt(startAxialPos) != null)
         {
-            Unit spawnedUnit = Instantiate(testUnitPrefab);
-            spawnedUnit.name = name;
-            spawnedUnit.Initialize(team, name);
-            spawnedUnit.SetStartupPosition(gridPos, this);
+             spawnedUnit.SetStartupPosition(startAxialPos, this);
         }
         else
         {
-            Debug.LogError($"Could not spawn {name} at {gridPos}");
+            Debug.LogError($"Cannot spawn Unit: tile [Offset {startCol},{startRow} / Axial {startAxialPos}] doesn't exist.");
         }
     }
+}
 
     public void GenerateGridData()
     {
@@ -102,29 +99,6 @@ public class HexGrid : MonoBehaviour
                 }
             }
         }
-    }
-
-    public List<Vector2Int> GetTilesInRadius(Vector2Int center, int range)
-    {
-        List<Vector2Int> results = new List<Vector2Int>();
-
-        for (int q = -range; q <= range; q++)
-        {
-            int r1 = Mathf.Max(-range, -q - range);
-            int r2 = Mathf.Min(range, -q + range);
-
-            for (int r = r1; r <= r2; r++)
-            {
-                Vector2Int offset = new Vector2Int(q, r);
-                Vector2Int neighbourPos = center + offset;
-
-                if (tiles.ContainsKey(neighbourPos))
-                {
-                    results.Add(neighbourPos);
-                }
-            }
-        }
-        return results;
     }
 }
 
