@@ -30,5 +30,17 @@ services:
     depends_on:
       - db
 
+  frontend:
+    container_name: game_frontend
+    build:
+      context: ./wdm_Admin
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
 volumes:
   postgres_data:
