@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: game_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-student}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-student}
+      POSTGRES_DB: ${DB_NAME:-gamedb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./wdm_Backend/init-db.sql:/docker-entrypoint-initdb.d/init.sql
+
+  backend:
+    container_name: game_backend
+    build:
+      context: ./wdm_Backend/api
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_USER=${DB_USER:-student}
+      - DB_HOST=db
+      - DB_NAME=${DB_NAME:-gamedb}
+      - DB_PASSWORD=${DB_PASSWORD:-student}
+      - PORT=3000
+    depends_on:
+      - db
+
+  frontend:
+    container_name: game_frontend
+    build:
+      context: ./wdm_Admin
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
