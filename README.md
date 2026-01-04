@@ -57,7 +57,7 @@ This project offers a full-stack solution for collecting, storing, and visualizi
 
 **1. Clone repository**
 ```bash
-git clone <repository-url>
+git clone <https://github.com/EHB-MCT/wdm-EphramJanssens.git>
 cd wdm-EphramJanssens
 ```
 
@@ -72,10 +72,25 @@ http://localhost:3000/api/logs
 7. Make sure the **Enable Logging** checkbox is ON.
 
 **3. Environment setup**
-# Make a .env following the .env.template
+Make a .env following the .env.template
 
 **4. Start services**
-docker-compose up --build
+`docker-compose up --build`
+
+**5. Play game**
+1. Press the start button to play.
+2. Left click on the blue cube to do an action.
+3. Right click to dismiss.
+4. Left click on a highlighted tile to move there.
+5. When next to an enemy, left click on it todo damage.
+6. When energy points are depleted end your turn.
+7. On the dashboard the logged actions are shown (may need to refresh).
+
+**6. Routes**
+- `http://localhost:5173` - Dashboard.
+- `http://localhost:3000` - Backend health check.
+- `http://localhost:3000/api/logs` - JSON log data.
+- 
 
 **API Endpoints**
 - `POST /api/logs` - Receive game data from Unity
